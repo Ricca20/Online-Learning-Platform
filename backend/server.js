@@ -25,8 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // --------------- API Routes ---------------
-// Routes will be mounted here in later phases:
-// app.use("/api/v1/auth", require("./src/routes/authRoutes"));
+app.use("/api/v1/auth", require("./src/routes/authRoutes"));
 // app.use("/api/v1/courses", require("./src/routes/courseRoutes"));
 // app.use("/api/v1/enrollments", require("./src/routes/enrollmentRoutes"));
 // app.use("/api/v1/ai", require("./src/routes/aiRoutes"));
