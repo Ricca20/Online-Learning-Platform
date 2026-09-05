@@ -8,7 +8,11 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
-// Placeholder pages — will be replaced in Phases 6, 7, 8
+import CoursesPage from "./pages/CoursesPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
+import EnrolledCoursesPage from "./pages/EnrolledCoursesPage";
+
+// Placeholder pages — will be replaced in Phases 7, 8
 function PlaceholderPage({ title }) {
   return (
     <div className="page container">
@@ -69,12 +73,12 @@ function App() {
           <Route element={<LayoutWithNavbar />}>
             {/* Public */}
             <Route path="/" element={<Navigate to="/courses" replace />} />
-            <Route path="/courses" element={<PlaceholderPage title="Courses" />} />
-            <Route path="/courses/:id" element={<PlaceholderPage title="Course Detail" />} />
+            <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/courses/:id" element={<CourseDetailPage />} />
 
             {/* Student protected */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
-              <Route path="/my-enrollments" element={<PlaceholderPage title="My Enrollments" />} />
+              <Route path="/my-enrollments" element={<EnrolledCoursesPage />} />
               <Route path="/ai-recommender" element={<PlaceholderPage title="AI Recommender" />} />
             </Route>
 
