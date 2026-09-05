@@ -1,0 +1,25 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build directories
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
