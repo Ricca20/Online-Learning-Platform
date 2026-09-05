@@ -1,0 +1,15 @@
+{
+  "name": "online-learning-platform",
+  "version": "1.0.0",
+  "description": "A full-stack Online Learning Platform with ChatGPT integration built on the MERN stack",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && node src/seed.js"
+  },
+  "keywords": ["mern", "learning-platform", "education", "chatgpt"],
+  "author": "",
+  "license": "ISC"
+}

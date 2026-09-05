@@ -1,21 +1,27 @@
-# Node
+# Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
+
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Build directories
+# Build output
 dist/
 build/
 
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # macOS
 .DS_Store
+.DS_Store?
 
-# Editor directories and files
+# Editor directories
 .vscode/
 .idea/
 *.suo
@@ -23,3 +29,7 @@ build/
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated
+Thumbs.db
+ehthumbs.db
