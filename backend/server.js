@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
 const connectDB = require("./src/config/db");
 
 const app = express();
@@ -11,6 +12,20 @@ const PORT = process.env.PORT || 5000;
 // --------------- Security & Logging Middleware ---------------
 app.use(helmet());
 app.use(morgan("dev"));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { success: false, message: "Too many requests from this IP, please try again later." }
+});
+app.use(limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: "Too many login/register attempts, please try again later." }
+});
 
 // --------------- CORS ---------------
 app.use(
@@ -25,7 +40,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // --------------- API Routes ---------------
-app.use("/api/v1/auth", require("./src/routes/authRoutes"));
+app.use("/api/v1/auth", authLimiter, require("./src/routes/authRoutes"));
 app.use("/api/v1/courses", require("./src/routes/courseRoutes"));
 app.use("/api/v1/enrollments", require("./src/routes/enrollmentRoutes"));
 app.use("/api/v1/ai", require("./src/routes/aiRoutes"));
