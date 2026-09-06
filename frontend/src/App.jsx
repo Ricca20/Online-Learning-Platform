@@ -14,18 +14,7 @@ import EnrolledCoursesPage from "./pages/EnrolledCoursesPage";
 import InstructorDashboardPage from "./pages/InstructorDashboardPage";
 import ManageCoursePage from "./pages/ManageCoursePage";
 import CourseEnrollmentsPage from "./pages/CourseEnrollmentsPage";
-
-// Placeholder pages — will be replaced in Phases 8
-function PlaceholderPage({ title }) {
-  return (
-    <div className="page container">
-      <div className="page-header">
-        <h1>{title}</h1>
-        <p>This page will be built in a later phase.</p>
-      </div>
-    </div>
-  );
-}
+import AIRecommenderPage from "./pages/AIRecommenderPage";
 
 function UnauthorizedPage() {
   return (
@@ -82,7 +71,7 @@ function App() {
             {/* Student protected */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
               <Route path="/my-enrollments" element={<EnrolledCoursesPage />} />
-              <Route path="/ai-recommender" element={<PlaceholderPage title="AI Recommender" />} />
+              <Route path="/ai-recommender" element={<AIRecommenderPage />} />
             </Route>
 
             {/* Instructor protected */}
