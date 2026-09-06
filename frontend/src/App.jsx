@@ -11,8 +11,11 @@ import RegisterPage from "./pages/RegisterPage";
 import CoursesPage from "./pages/CoursesPage";
 import CourseDetailPage from "./pages/CourseDetailPage";
 import EnrolledCoursesPage from "./pages/EnrolledCoursesPage";
+import InstructorDashboardPage from "./pages/InstructorDashboardPage";
+import ManageCoursePage from "./pages/ManageCoursePage";
+import CourseEnrollmentsPage from "./pages/CourseEnrollmentsPage";
 
-// Placeholder pages — will be replaced in Phases 7, 8
+// Placeholder pages — will be replaced in Phases 8
 function PlaceholderPage({ title }) {
   return (
     <div className="page container">
@@ -84,10 +87,10 @@ function App() {
 
             {/* Instructor protected */}
             <Route element={<ProtectedRoute allowedRoles={["instructor"]} />}>
-              <Route path="/instructor/dashboard" element={<PlaceholderPage title="Instructor Dashboard" />} />
-              <Route path="/instructor/courses/new" element={<PlaceholderPage title="Create Course" />} />
-              <Route path="/instructor/courses/:id/edit" element={<PlaceholderPage title="Edit Course" />} />
-              <Route path="/instructor/courses/:id/enrollments" element={<PlaceholderPage title="Course Enrollments" />} />
+              <Route path="/instructor/dashboard" element={<InstructorDashboardPage />} />
+              <Route path="/instructor/courses/new" element={<ManageCoursePage />} />
+              <Route path="/instructor/courses/:id/edit" element={<ManageCoursePage />} />
+              <Route path="/instructor/courses/:id/enrollments" element={<CourseEnrollmentsPage />} />
             </Route>
           </Route>
         </Routes>
