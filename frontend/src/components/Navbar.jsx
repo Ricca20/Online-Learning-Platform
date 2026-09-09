@@ -34,20 +34,12 @@ function Navbar() {
           </Link>
 
           {role === "student" && (
-            <>
-              <Link
-                to="/my-enrollments"
-                className={isActive("/my-enrollments") ? "active" : ""}
-              >
-                My Learning
-              </Link>
-              <Link
-                to="/ai-recommender"
-                className={isActive("/ai-recommender") ? "active" : ""}
-              >
-                AI Advisor
-              </Link>
-            </>
+            <Link
+              to="/my-enrollments"
+              className={isActive("/my-enrollments") ? "active" : ""}
+            >
+              My Learning
+            </Link>
           )}
 
           {role === "instructor" && (

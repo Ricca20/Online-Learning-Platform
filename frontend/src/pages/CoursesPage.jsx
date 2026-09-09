@@ -16,7 +16,6 @@ function CoursesPage() {
         setCourses(data.data.courses);
         setFiltered(data.data.courses);
       } catch (error) {
-        console.error("Failed to fetch courses:", error);
       } finally {
         setLoading(false);
       }

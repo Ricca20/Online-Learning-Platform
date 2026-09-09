@@ -17,7 +17,6 @@ function InstructorDashboardPage() {
       setCourses(data.data.courses);
     } catch (error) {
       toast.error("Failed to load your courses");
-      console.error(error);
     } finally {
       setLoading(false);
     }

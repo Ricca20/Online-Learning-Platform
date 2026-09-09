@@ -15,7 +15,6 @@ function EnrolledCoursesPage() {
         setEnrollments(data.data.enrollments);
       } catch (error) {
         toast.error("Failed to load your enrollments");
-        console.error(error);
       } finally {
         setLoading(false);
       }

@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ChatBot from "./components/ChatBot";
 
 // Pages
 import LoginPage from "./pages/LoginPage";
@@ -14,7 +15,6 @@ import EnrolledCoursesPage from "./pages/EnrolledCoursesPage";
 import InstructorDashboardPage from "./pages/InstructorDashboardPage";
 import ManageCoursePage from "./pages/ManageCoursePage";
 import CourseEnrollmentsPage from "./pages/CourseEnrollmentsPage";
-import AIRecommenderPage from "./pages/AIRecommenderPage";
 
 function UnauthorizedPage() {
   return (
@@ -58,6 +58,7 @@ function App() {
             error:   { iconTheme: { primary: "#dc2626", secondary: "#ffffff" } },
           }}
         />
+        <ChatBot />
         <Routes>
           {/* Public routes without navbar */}
           <Route path="/login" element={<LoginPage />} />
@@ -74,7 +75,6 @@ function App() {
             {/* Student protected */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
               <Route path="/my-enrollments" element={<EnrolledCoursesPage />} />
-              <Route path="/ai-recommender" element={<AIRecommenderPage />} />
             </Route>
 
             {/* Instructor protected */}

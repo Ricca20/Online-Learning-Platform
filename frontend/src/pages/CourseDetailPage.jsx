@@ -29,7 +29,6 @@ function CourseDetailPage() {
         }
       } catch (error) {
         toast.error("Failed to load course details");
-        console.error(error);
       } finally {
         setLoading(false);
       }

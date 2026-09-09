@@ -15,8 +15,7 @@ function CourseEnrollmentsPage() {
         const response = await axiosInstance.get(`/courses/${id}/enrollments`);
         setData(response.data.data);
       } catch (error) {
-        toast.error("Failed to load course enrollments");
-        console.error(error);
+        toast.error("Failed to load enrollments");
       } finally {
         setLoading(false);
       }
