@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const ApiError = require("../utils/ApiError");
+const asyncHandler = require("../utils/asyncHandler");
 
 /**
  * Verify JWT token from Authorization header.
@@ -9,7 +10,7 @@ const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new ApiError(401, "Access denied. No token provided");
+    return next(new ApiError(401, "Access denied. No token provided"));
   }
 
   const token = authHeader.split(" ")[1];
@@ -19,7 +20,7 @@ const verifyToken = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    throw new ApiError(401, "Invalid or expired token");
+    return next(new ApiError(401, "Invalid or expired token"));
   }
 };
 
@@ -31,7 +32,7 @@ const verifyToken = (req, res, next) => {
  * @param  {...string} roles - Allowed roles (e.g. 'instructor', 'student')
  */
 const authorise = (...roles) => {
-  return async (req, res, next) => {
+  return asyncHandler(async (req, res, next) => {
     // verifyToken only sets id, so we need to look up the full user
     const User = require("../models/User");
     const user = await User.findById(req.user.id).select("-password");
@@ -47,7 +48,7 @@ const authorise = (...roles) => {
     // Attach full user object to req.user for downstream use
     req.user = user;
     next();
-  };
+  });
 };
 
 module.exports = { verifyToken, authorise };

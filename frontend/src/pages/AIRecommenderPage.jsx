@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight, Cpu } from "lucide-react";
 import toast from "react-hot-toast";
 
 function AIRecommenderPage() {
@@ -12,9 +12,8 @@ function AIRecommenderPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!prompt.trim()) return;
-
     setLoading(true);
-    setRecommendation(""); // Clear previous results
+    setRecommendation("");
 
     try {
       const { data } = await axiosInstance.post("/ai/recommend", { prompt });
@@ -27,46 +26,40 @@ function AIRecommenderPage() {
   };
 
   return (
-    <div className="page container" style={{ maxWidth: "800px" }}>
-      <div className="page-header" style={{ textAlign: "center", marginBottom: "var(--space-10)" }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "var(--space-4)" }}>
-          <div 
-            style={{ 
-              background: "var(--gradient-primary)", 
-              width: "64px", 
-              height: "64px", 
-              borderRadius: "50%", 
-              display: "flex", 
-              alignItems: "center", 
-              justifyContent: "center",
-              boxShadow: "var(--shadow-glow)"
-            }}
-          >
-            <Sparkles size={32} color="white" />
-          </div>
-        </div>
-        <h1>AI Course Recommender</h1>
-        <p>Tell us your career goal and we'll suggest the best courses for you.</p>
+    <div className="page container" style={{ maxWidth: "760px" }}>
+      <div className="page-header">
+        <p className="section-label">AI Advisor</p>
+        <h1>Find the right course for your goal</h1>
+        <p>
+          Describe what you want to achieve and our AI will match you to the
+          most relevant courses in the catalog.
+        </p>
       </div>
 
       <div className="card">
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="form-group" style={{ marginBottom: "var(--space-4)" }}>
+            <label className="form-label" htmlFor="ai-prompt">
+              What do you want to learn or achieve?
+            </label>
             <textarea
+              id="ai-prompt"
               className="form-textarea"
-              placeholder="e.g. I want to become a software engineer. What courses should I take?"
+              placeholder="e.g. I want to become a backend developer and learn Node.js and databases."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              style={{ fontSize: "var(--font-size-lg)", minHeight: "120px" }}
+              style={{ minHeight: "110px", fontSize: "var(--font-size-base)" }}
               required
             />
           </div>
-          <button 
-            type="submit" 
-            className="btn btn-primary btn-block btn-lg"
+          <button
+            type="submit"
+            className="btn btn-primary"
             disabled={loading || !prompt.trim()}
+            style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}
           >
-            {loading ? "Generating Recommendations..." : "Get Recommendations"}
+            <Cpu size={15} />
+            {loading ? "Analysing…" : "Get Recommendations"}
           </button>
         </form>
       </div>
@@ -78,17 +71,19 @@ function AIRecommenderPage() {
       )}
 
       {recommendation && !loading && (
-        <div style={{ animation: "slideUp 0.5s ease" }}>
-          <div className="ai-result">
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-4)", color: "var(--color-accent)", fontWeight: 700 }}>
-              <Sparkles size={18} /> AI Suggestion
-            </div>
-            {recommendation}
+        <div className="ai-result">
+          <div className="ai-result-header">
+            <Cpu size={14} /> AI Suggestion
           </div>
-          
-          <div style={{ textAlign: "center", marginTop: "var(--space-8)" }}>
-            <Link to="/courses" className="btn btn-ghost" style={{ fontSize: "var(--font-size-sm)" }}>
-              Browse All Courses <ArrowRight size={16} />
+          {recommendation}
+
+          <div style={{ marginTop: "var(--space-6)", paddingTop: "var(--space-4)", borderTop: "1px solid var(--color-border)" }}>
+            <Link
+              to="/courses"
+              className="btn btn-outline btn-sm"
+              style={{ gap: "var(--space-1)" }}
+            >
+              Browse all courses <ArrowRight size={13} />
             </Link>
           </div>
         </div>

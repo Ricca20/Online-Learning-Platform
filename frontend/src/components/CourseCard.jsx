@@ -1,33 +1,68 @@
 import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+
+// Deterministic teal shade based on course title — no AI images
+const THUMB_COLORS = [
+  ["#0d9488","#0891b2"],
+  ["#0f766e","#0369a1"],
+  ["#115e59","#075985"],
+  ["#134e4a","#0c4a6e"],
+  ["#0e7490","#0f766e"],
+];
+
+function getThumbColors(title = "") {
+  const idx = title.charCodeAt(0) % THUMB_COLORS.length;
+  return THUMB_COLORS[idx];
+}
 
 function CourseCard({ course }) {
-  const placeholderImg = `https://ui-avatars.com/api/?name=${encodeURIComponent(course.title)}&size=400&background=7c58ff&color=fff&font-size=0.25`;
+  const [c1, c2] = getThumbColors(course.title);
 
   return (
     <div className="course-card" id={`course-card-${course._id}`}>
-      <img
-        className="course-card-thumbnail"
-        src={course.thumbnailUrl || placeholderImg}
-        alt={course.title}
-        onError={(e) => { e.target.src = placeholderImg; }}
-      />
+      {course.thumbnailUrl ? (
+        <img
+          className="course-card-thumbnail"
+          src={course.thumbnailUrl}
+          alt={course.title}
+          onError={(e) => {
+            e.target.style.display = "none";
+            e.target.nextSibling.style.display = "flex";
+          }}
+        />
+      ) : null}
+      <div
+        className="course-card-thumb-placeholder"
+        style={{
+          background: `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`,
+          display: course.thumbnailUrl ? "none" : "flex",
+        }}
+      >
+        {course.title?.substring(0, 32)}
+      </div>
+
       <div className="course-card-body">
+        {course.category && (
+          <span className="badge badge-accent" style={{ marginBottom: "var(--space-2)" }}>
+            {course.category}
+          </span>
+        )}
         <h3>{course.title}</h3>
-        <p className="instructor">
-          by {course.instructor?.name || "Unknown Instructor"}
-        </p>
+        <p className="instructor">by {course.instructor?.name || "Unknown Instructor"}</p>
         <p className="description">
           {course.description?.length > 100
-            ? course.description.substring(0, 100) + "..."
+            ? course.description.substring(0, 100) + "…"
             : course.description}
         </p>
       </div>
+
       <div className="course-card-footer">
-        {course.category && (
-          <span className="badge badge-accent">{course.category}</span>
-        )}
-        <Link to={`/courses/${course._id}`} className="btn btn-primary btn-sm">
-          View Details
+        <Link
+          to={`/courses/${course._id}`}
+          className="btn btn-outline btn-sm"
+          style={{ gap: "var(--space-1)" }}
+        >
+          View Course <ArrowRight size={13} />
         </Link>
       </div>
     </div>

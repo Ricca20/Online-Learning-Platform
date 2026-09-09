@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../api/axiosInstance";
 import toast from "react-hot-toast";
-import { UserPlus } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -16,28 +16,19 @@ function RegisterPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const { data } = await axiosInstance.post("/auth/register", formData);
       login(data.data.user, data.data.token);
       toast.success("Account created successfully!");
-
-      if (data.data.user.role === "instructor") {
-        navigate("/instructor/dashboard");
-      } else {
-        navigate("/courses");
-      }
+      navigate(data.data.user.role === "instructor" ? "/instructor/dashboard" : "/courses");
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Registration failed. Please try again.";
-      toast.error(message);
+      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -46,28 +37,21 @@ function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div style={{ textAlign: "center", marginBottom: "var(--space-2)" }}>
-          <UserPlus
-            size={40}
-            style={{ color: "var(--color-accent)", marginBottom: "var(--space-3)" }}
-          />
+        <div className="auth-brand">
+          <BookOpen size={18} />
+          LearnHub
         </div>
-        <h1 style={{ textAlign: "center" }}>Create Account</h1>
-        <p className="subtitle" style={{ textAlign: "center" }}>
-          Join our learning community today
-        </p>
+
+        <h1>Create your account</h1>
+        <p className="subtitle">Join thousands of learners building real skills.</p>
 
         <form onSubmit={handleSubmit} id="register-form">
           <div className="form-group">
-            <label className="form-label" htmlFor="name">
-              Full Name
-            </label>
+            <label className="form-label" htmlFor="name">Full Name</label>
             <input
-              type="text"
-              id="name"
-              name="name"
+              type="text" id="name" name="name"
               className="form-input"
-              placeholder="Enter your full name"
+              placeholder="Jane Doe"
               value={formData.name}
               onChange={handleChange}
               required
@@ -75,15 +59,11 @@ function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="email">
-              Email Address
-            </label>
+            <label className="form-label" htmlFor="email">Email</label>
             <input
-              type="email"
-              id="email"
-              name="email"
+              type="email" id="email" name="email"
               className="form-input"
-              placeholder="you@example.com"
+              placeholder="jane@example.com"
               value={formData.email}
               onChange={handleChange}
               required
@@ -91,35 +71,27 @@ function RegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="password">
-              Password
-            </label>
+            <label className="form-label" htmlFor="password">Password</label>
             <input
-              type="password"
-              id="password"
-              name="password"
+              type="password" id="password" name="password"
               className="form-input"
-              placeholder="Min. 6 characters"
+              placeholder="At least 6 characters"
               value={formData.password}
               onChange={handleChange}
-              required
-              minLength={6}
+              required minLength={6}
             />
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="role">
-              I am a
-            </label>
+            <label className="form-label" htmlFor="role">I want to</label>
             <select
-              id="role"
-              name="role"
+              id="role" name="role"
               className="form-select"
               value={formData.role}
               onChange={handleChange}
             >
-              <option value="student">Student</option>
-              <option value="instructor">Instructor</option>
+              <option value="student">Learn — I'm a student</option>
+              <option value="instructor">Teach — I'm an instructor</option>
             </select>
           </div>
 
@@ -128,13 +100,15 @@ function RegisterPage() {
             className="btn btn-primary btn-block btn-lg"
             disabled={loading}
             id="register-submit-btn"
+            style={{ marginTop: "var(--space-2)" }}
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? "Creating account…" : "Create Account"}
           </button>
         </form>
 
         <p className="auth-footer">
-          Already have an account? <Link to="/login">Sign in</Link>
+          Already have an account?{" "}
+          <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>

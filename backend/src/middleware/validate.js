@@ -9,7 +9,7 @@ const validate = (req, res, next) => {
   if (!errors.isEmpty()) {
     // Get the first error message
     const message = errors.array()[0].msg;
-    throw new ApiError(400, message);
+    return next(new ApiError(400, message));
   }
   next();
 };

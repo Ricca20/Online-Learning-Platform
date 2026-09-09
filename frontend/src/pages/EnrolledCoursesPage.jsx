@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../api/axiosInstance";
 import CourseCard from "../components/CourseCard";
-import { GraduationCap } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 
 function EnrolledCoursesPage() {
@@ -20,7 +20,6 @@ function EnrolledCoursesPage() {
         setLoading(false);
       }
     };
-
     fetchEnrollments();
   }, []);
 
@@ -37,32 +36,38 @@ function EnrolledCoursesPage() {
   return (
     <div className="page container">
       <div className="page-header">
-        <h1>My Enrollments</h1>
-        <p>Keep track of the courses you're learning</p>
+        <p className="section-label">My Learning</p>
+        <h1>Your enrolled courses</h1>
+        <p>{enrollments.length} course{enrollments.length !== 1 ? "s" : ""} in progress</p>
       </div>
 
       {enrollments.length === 0 ? (
         <div className="empty-state">
-          <GraduationCap size={64} />
-          <h3>You aren't enrolled in any courses yet</h3>
-          <p>Explore our catalog and start learning today!</p>
+          <BookOpen size={52} />
+          <h3>No enrollments yet</h3>
+          <p>Browse the catalog and enroll in a course to get started.</p>
           <a href="/courses" className="btn btn-primary">Browse Courses</a>
         </div>
       ) : (
         <div className="grid grid-cols-3">
           {enrollments.map((enrollment) => (
             <div key={enrollment._id} style={{ position: "relative" }}>
-              <div 
-                className="badge badge-success" 
-                style={{ 
-                  position: "absolute", 
-                  top: "var(--space-2)", 
-                  right: "var(--space-2)", 
+              <div
+                style={{
+                  position: "absolute",
+                  top: "var(--space-2)",
+                  right: "var(--space-2)",
                   zIndex: 10,
-                  boxShadow: "var(--shadow-sm)"
                 }}
               >
-                {enrollment.status === "active" ? "In Progress" : "Completed"}
+                <span
+                  className={`badge ${
+                    enrollment.status === "active" ? "badge-success" : "badge-info"
+                  }`}
+                  style={{ boxShadow: "var(--shadow-xs)" }}
+                >
+                  {enrollment.status === "active" ? "In Progress" : "Completed"}
+                </span>
               </div>
               <CourseCard course={enrollment.course} />
             </div>

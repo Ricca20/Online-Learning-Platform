@@ -21,12 +21,14 @@ const courseValidation = [
 
 // ──────── Public Routes ────────
 router.get("/", getAllCourses);
-router.get("/:id", getCourseById);
 
 // ──────── Instructor Routes ────────
-// NOTE: /my must be defined BEFORE /:id to prevent "my" being treated as an id param
+// NOTE: /my MUST be defined BEFORE /:id to prevent "my" being treated as a mongo id param
 router.get("/my", verifyToken, authorise("instructor"), getInstructorCourses);
 router.post("/", verifyToken, authorise("instructor"), courseValidation, validate, createCourse);
+
+// ──────── Routes with :id param ────────
+router.get("/:id", getCourseById);
 router.put("/:id", verifyToken, authorise("instructor"), courseValidation, validate, updateCourse);
 router.delete("/:id", verifyToken, authorise("instructor"), deleteCourse);
 router.get("/:id/enrollments", verifyToken, authorise("instructor"), getCourseEnrollments);

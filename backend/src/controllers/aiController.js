@@ -4,10 +4,6 @@ const asyncHandler = require("../utils/asyncHandler");
 const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 /**
  * @desc    Get AI-powered course recommendations based on student's goal
  * @route   POST /api/v1/ai/recommend
@@ -19,6 +15,15 @@ const getCourseRecommendations = asyncHandler(async (req, res) => {
   if (!prompt || prompt.trim().length === 0) {
     throw new ApiError(400, "Please provide a prompt describing your learning goal");
   }
+
+  // Guard against unconfigured API key
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey === "your_openai_api_key_here") {
+    throw new ApiError(503, "AI service is not configured. Please contact the administrator.");
+  }
+
+  // Instantiate client lazily so it always picks up the live env value
+  const openai = new OpenAI({ apiKey });
 
   // Fetch all courses (lightweight projection)
   const courses = await Course.find({}, "title description category");

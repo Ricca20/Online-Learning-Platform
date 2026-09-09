@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { GraduationCap, LogOut } from "lucide-react";
+import { LogOut, BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 
 function Navbar() {
@@ -19,13 +19,15 @@ function Navbar() {
   return (
     <nav className="navbar" id="main-navbar">
       <div className="container">
+        {/* Brand */}
         <Link to="/" className="navbar-brand">
           <span className="brand-icon">
-            <GraduationCap size={18} color="white" />
+            <BookOpen size={14} color="white" />
           </span>
           LearnHub
         </Link>
 
+        {/* Nav links */}
         <div className="navbar-links">
           <Link to="/courses" className={isActive("/courses") ? "active" : ""}>
             Courses
@@ -37,13 +39,13 @@ function Navbar() {
                 to="/my-enrollments"
                 className={isActive("/my-enrollments") ? "active" : ""}
               >
-                My Enrollments
+                My Learning
               </Link>
               <Link
                 to="/ai-recommender"
                 className={isActive("/ai-recommender") ? "active" : ""}
               >
-                AI Recommender
+                AI Advisor
               </Link>
             </>
           )}
@@ -54,18 +56,19 @@ function Navbar() {
                 to="/instructor/dashboard"
                 className={isActive("/instructor/dashboard") ? "active" : ""}
               >
-                My Courses
+                Dashboard
               </Link>
               <Link
                 to="/instructor/courses/new"
                 className={isActive("/instructor/courses/new") ? "active" : ""}
               >
-                Add Course
+                New Course
               </Link>
             </>
           )}
         </div>
 
+        {/* Actions */}
         <div className="navbar-actions">
           {isAuthenticated ? (
             <>
@@ -73,23 +76,24 @@ function Navbar() {
                 <span className="avatar">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
-                <span>{user?.name}</span>
+                <span style={{ fontWeight: 500 }}>{user?.name}</span>
               </div>
               <button
                 className="btn btn-ghost btn-sm"
                 onClick={handleLogout}
                 id="logout-btn"
+                title="Log out"
               >
-                <LogOut size={16} />
+                <LogOut size={15} />
               </button>
             </>
           ) : (
             <>
               <Link to="/login" className="btn btn-ghost btn-sm">
-                Login
+                Log in
               </Link>
               <Link to="/register" className="btn btn-primary btn-sm">
-                Sign Up
+                Get Started
               </Link>
             </>
           )}

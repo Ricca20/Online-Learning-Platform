@@ -9,9 +9,7 @@ function InstructorDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState(null);
 
-  useEffect(() => {
-    fetchMyCourses();
-  }, []);
+  useEffect(() => { fetchMyCourses(); }, []);
 
   const fetchMyCourses = async () => {
     try {
@@ -27,11 +25,10 @@ function InstructorDashboardPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    
     try {
       await axiosInstance.delete(`/courses/${deleteId}`);
-      toast.success("Course deleted successfully");
-      setCourses(courses.filter(c => c._id !== deleteId));
+      toast.success("Course deleted");
+      setCourses(courses.filter((c) => c._id !== deleteId));
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete course");
     } finally {
@@ -49,88 +46,100 @@ function InstructorDashboardPage() {
     );
   }
 
-  // Calculate total enrollments across all courses
-  const totalEnrollments = courses.reduce((sum, course) => sum + (course.enrolledStudents?.length || 0), 0);
+  const totalEnrollments = courses.reduce(
+    (sum, c) => sum + (c.enrolledStudents?.length || 0),
+    0
+  );
 
   return (
     <div className="page container">
-      <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      {/* Header strip */}
+      <div className="dashboard-header">
         <div>
           <h1>Instructor Dashboard</h1>
-          <p>Manage your courses and track student enrollments</p>
+          <p>Manage your courses and track student progress</p>
         </div>
-        <Link to="/instructor/courses/new" className="btn btn-primary">
-          <Plus size={18} /> Create New Course
+        <Link to="/instructor/courses/new" className="btn btn-sm" style={{ background: "white", color: "var(--color-accent)", border: "none" }}>
+          <Plus size={15} /> New Course
         </Link>
       </div>
 
-      <div className="grid grid-cols-2" style={{ marginBottom: "var(--space-8)" }}>
+      {/* Stat cards */}
+      <div className="grid grid-cols-2" style={{ marginBottom: "var(--space-8)", maxWidth: "480px" }}>
         <div className="stat-card">
-          <Book size={32} style={{ margin: "0 auto var(--space-3)", color: "var(--color-accent)" }} />
+          <Book size={24} style={{ margin: "0 auto var(--space-2)", color: "var(--color-accent)" }} />
           <div className="stat-value">{courses.length}</div>
-          <div className="stat-label">Total Courses Created</div>
+          <div className="stat-label">Courses Published</div>
         </div>
         <div className="stat-card">
-          <Users size={32} style={{ margin: "0 auto var(--space-3)", color: "var(--color-success)" }} />
+          <Users size={24} style={{ margin: "0 auto var(--space-2)", color: "var(--color-success)" }} />
           <div className="stat-value">{totalEnrollments}</div>
-          <div className="stat-label">Total Student Enrollments</div>
+          <div className="stat-label">Total Students</div>
         </div>
       </div>
 
-      <h2>Your Courses</h2>
-      
+      <h2 style={{ fontSize: "var(--font-size-lg)", fontWeight: 700, marginBottom: "var(--space-4)" }}>
+        Your Courses
+      </h2>
+
       {courses.length === 0 ? (
         <div className="empty-state" style={{ marginTop: "var(--space-6)" }}>
-          <Book size={64} />
-          <h3>You haven't created any courses yet</h3>
-          <p>Share your knowledge by creating your first course.</p>
-          <Link to="/instructor/courses/new" className="btn btn-primary">Create Course</Link>
+          <Book size={52} />
+          <h3>No courses yet</h3>
+          <p>Create your first course and start sharing your expertise.</p>
+          <Link to="/instructor/courses/new" className="btn btn-primary">
+            Create First Course
+          </Link>
         </div>
       ) : (
-        <div className="table-container" style={{ marginTop: "var(--space-6)" }}>
+        <div className="table-container">
           <table className="table">
             <thead>
               <tr>
-                <th>Course Title</th>
+                <th>Course</th>
                 <th>Category</th>
                 <th>Students</th>
-                <th>Created Date</th>
+                <th>Published</th>
                 <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {courses.map(course => (
+              {courses.map((course) => (
                 <tr key={course._id}>
-                  <td style={{ fontWeight: 500 }}>{course.title}</td>
+                  <td style={{ fontWeight: 600 }}>{course.title}</td>
                   <td>
                     {course.category ? (
                       <span className="badge badge-accent">{course.category}</span>
-                    ) : "-"}
+                    ) : (
+                      <span style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-sm)" }}>—</span>
+                    )}
                   </td>
                   <td>
-                    <Link 
-                      to={`/instructor/courses/${course._id}/enrollments`} 
-                      style={{ color: "var(--color-info)", display: "flex", alignItems: "center", gap: "var(--space-1)" }}
+                    <Link
+                      to={`/instructor/courses/${course._id}/enrollments`}
+                      style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-info)", fontWeight: 500 }}
                     >
-                      <Users size={14} /> {course.enrolledStudents?.length || 0}
+                      <Users size={13} /> {course.enrolledStudents?.length || 0}
                     </Link>
                   </td>
-                  <td>{new Date(course.createdAt).toLocaleDateString()}</td>
+                  <td style={{ color: "var(--color-text-secondary)", fontSize: "var(--font-size-sm)" }}>
+                    {new Date(course.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </td>
                   <td style={{ textAlign: "right" }}>
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--space-2)" }}>
-                      <Link to={`/courses/${course._id}`} className="btn btn-ghost btn-sm" title="View Course">
-                        <Eye size={16} />
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "var(--space-1)" }}>
+                      <Link to={`/courses/${course._id}`} className="btn btn-ghost btn-sm" title="Preview">
+                        <Eye size={14} />
                       </Link>
-                      <Link to={`/instructor/courses/${course._id}/edit`} className="btn btn-ghost btn-sm" title="Edit Course">
-                        <Edit size={16} />
+                      <Link to={`/instructor/courses/${course._id}/edit`} className="btn btn-ghost btn-sm" title="Edit">
+                        <Edit size={14} />
                       </Link>
-                      <button 
-                        className="btn btn-ghost btn-sm" 
+                      <button
+                        className="btn btn-ghost btn-sm"
                         style={{ color: "var(--color-danger)" }}
                         onClick={() => setDeleteId(course._id)}
-                        title="Delete Course"
+                        title="Delete"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -141,15 +150,22 @@ function InstructorDashboardPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete confirmation */}
       {deleteId && (
         <div className="confirm-overlay">
           <div className="confirm-dialog">
-            <h3>Delete Course?</h3>
-            <p>Are you sure you want to delete this course? This action cannot be undone and will remove all student enrollments.</p>
+            <h3>Delete this course?</h3>
+            <p>
+              This will permanently remove the course and all student enrollments.
+              This action cannot be undone.
+            </p>
             <div className="confirm-actions">
-              <button className="btn btn-secondary" onClick={() => setDeleteId(null)}>Cancel</button>
-              <button className="btn btn-danger" onClick={handleDelete}>Yes, Delete</button>
+              <button className="btn btn-secondary" onClick={() => setDeleteId(null)}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={handleDelete}>
+                Delete Course
+              </button>
             </div>
           </div>
         </div>
