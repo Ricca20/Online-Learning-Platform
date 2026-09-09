@@ -58,6 +58,8 @@ const seedData = async () => {
       instructor: instructor1._id,
       content: "Module 1: Custom Hooks\nModule 2: Context API\nModule 3: useMemo & useCallback",
       category: "Web Development",
+      duration: "4 Weeks",
+      level: "Intermediate",
       enrolledStudents: [student1._id, student2._id],
     });
 
@@ -67,6 +69,8 @@ const seedData = async () => {
       instructor: instructor2._id,
       content: "Module 1: Pandas basics\nModule 2: Data Visualization\nModule 3: Machine Learning",
       category: "Data Science",
+      duration: "8 Weeks",
+      level: "Beginner",
       enrolledStudents: [student1._id],
     });
     
@@ -76,6 +80,8 @@ const seedData = async () => {
       instructor: instructor1._id,
       content: "Module 1: Figma Basics\nModule 2: Typography & Color\nModule 3: Prototyping",
       category: "Design",
+      duration: "2 Weeks",
+      level: "All Levels",
       enrolledStudents: [student2._id],
     });
 

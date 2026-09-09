@@ -162,6 +162,19 @@ const getCourseEnrollments = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Get all courses by a specific instructor ID
+ * @route   GET /api/v1/courses/instructor/:instructorId
+ * @access  Public
+ */
+const getCoursesByInstructorId = asyncHandler(async (req, res) => {
+  const courses = await Course.find({ instructor: req.params.instructorId })
+    .populate("instructor", "name email")
+    .sort({ createdAt: -1 });
+
+  ApiResponse.success(res, "Courses retrieved", { courses });
+});
+
 module.exports = {
   createCourse,
   getAllCourses,
@@ -170,4 +183,5 @@ module.exports = {
   deleteCourse,
   getInstructorCourses,
   getCourseEnrollments,
+  getCoursesByInstructorId,
 };

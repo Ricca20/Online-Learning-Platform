@@ -62,4 +62,29 @@ const getMyEnrollments = asyncHandler(async (req, res) => {
   ApiResponse.success(res, "Enrollments retrieved", { enrollments });
 });
 
-module.exports = { enrollInCourse, getMyEnrollments };
+/**
+ * @desc    Mark a course as completed
+ * @route   PUT /api/v1/enrollments/:courseId/complete
+ * @access  Private (student only)
+ */
+const markCourseCompleted = asyncHandler(async (req, res) => {
+  const enrollment = await Enrollment.findOne({
+    student: req.user._id,
+    course: req.params.courseId,
+  });
+
+  if (!enrollment) {
+    throw new ApiError(404, "Enrollment not found");
+  }
+
+  if (enrollment.status === "completed") {
+    throw new ApiError(400, "Course is already marked as completed");
+  }
+
+  enrollment.status = "completed";
+  await enrollment.save();
+
+  ApiResponse.success(res, "Course marked as completed", { enrollment });
+});
+
+module.exports = { enrollInCourse, getMyEnrollments, markCourseCompleted };

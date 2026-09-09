@@ -15,6 +15,7 @@ import EnrolledCoursesPage from "./pages/EnrolledCoursesPage";
 import InstructorDashboardPage from "./pages/InstructorDashboardPage";
 import ManageCoursePage from "./pages/ManageCoursePage";
 import CourseEnrollmentsPage from "./pages/CourseEnrollmentsPage";
+import InstructorProfilePage from "./pages/InstructorProfilePage";
 
 function UnauthorizedPage() {
   return (
@@ -71,6 +72,7 @@ function App() {
             <Route path="/" element={<Navigate to="/courses" replace />} />
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/courses/:id" element={<CourseDetailPage />} />
+            <Route path="/instructor-profile/:id" element={<InstructorProfilePage />} />
 
             {/* Student protected */}
             <Route element={<ProtectedRoute allowedRoles={["student"]} />}>

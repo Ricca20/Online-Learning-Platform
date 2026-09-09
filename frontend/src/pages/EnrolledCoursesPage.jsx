@@ -37,7 +37,11 @@ function EnrolledCoursesPage() {
       <div className="page-header">
         <p className="section-label">My Learning</p>
         <h1>Your enrolled courses</h1>
-        <p>{enrollments.length} course{enrollments.length !== 1 ? "s" : ""} in progress</p>
+        <p>
+          {enrollments.filter(e => e.status === "active").length} in progress 
+          <span style={{ margin: "0 8px", color: "var(--color-border)" }}>|</span> 
+          {enrollments.filter(e => e.status === "completed").length} completed
+        </p>
       </div>
 
       {enrollments.length === 0 ? (

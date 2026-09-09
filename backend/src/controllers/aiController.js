@@ -26,7 +26,7 @@ const getCourseRecommendations = asyncHandler(async (req, res) => {
   const openai = new OpenAI({ apiKey });
 
   // Fetch all courses (lightweight projection)
-  const courses = await Course.find({}, "title description category");
+  const courses = await Course.find({}, "title description category duration level");
 
   if (courses.length === 0) {
     throw new ApiError(404, "No courses available for recommendations");
@@ -34,7 +34,7 @@ const getCourseRecommendations = asyncHandler(async (req, res) => {
 
   // Build course list for the system prompt
   const courseList = courses
-    .map((course, index) => `${index + 1}. "${course.title}" — ${course.description} [Category: ${course.category || "General"}]`)
+    .map((course, index) => `${index + 1}. "${course.title}" — ${course.description} [Category: ${course.category || "General"}, Level: ${course.level || "All Levels"}, Duration: ${course.duration || "Self-paced"}]`)
     .join("\n");
 
   const systemPrompt = `You are a helpful learning assistant for an online education platform.

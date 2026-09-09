@@ -22,6 +22,15 @@ const courseSchema = new mongoose.Schema(
     category: {
       type: String,
     },
+    duration: {
+      type: String,
+      default: "Self-paced",
+    },
+    level: {
+      type: String,
+      enum: ["Beginner", "Intermediate", "Advanced", "All Levels"],
+      default: "All Levels",
+    },
     thumbnailUrl: {
       type: String,
     },

@@ -17,9 +17,6 @@ function ChatBot() {
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Only show for students (or unauthenticated users browsing)
-  if (role === "instructor") return null;
-
   // Scroll to latest message whenever messages change
   useEffect(() => {
     if (open) {
@@ -65,6 +62,9 @@ function ChatBot() {
       send();
     }
   };
+
+  // Only show for students (or unauthenticated users browsing)
+  if (role === "instructor") return null;
 
   return (
     <>

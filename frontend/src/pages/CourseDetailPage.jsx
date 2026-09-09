@@ -4,15 +4,19 @@ import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../api/axiosInstance";
 import toast from "react-hot-toast";
 import { ArrowLeft, Users, Calendar } from "lucide-react";
+import { parseMarkdown } from "../utils/markdownParser";
 
 function CourseDetailPage() {
   const { id } = useParams();
-  const { isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role, user } = useAuth();
 
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrollmentStatus, setEnrollmentStatus] = useState(null);
+  const [completing, setCompleting] = useState(false);
+  const [instructorEnrollments, setInstructorEnrollments] = useState([]);
 
   useEffect(() => {
     const fetchCourseAndEnrollment = async () => {
@@ -22,10 +26,16 @@ function CourseDetailPage() {
 
         if (isAuthenticated && role === "student") {
           const { data: enrollmentData } = await axiosInstance.get("/enrollments/my");
-          const enrolled = enrollmentData.data.enrollments.some(
+          const enrollment = enrollmentData.data.enrollments.find(
             (e) => e.course._id === id
           );
-          setIsEnrolled(enrolled);
+          if (enrollment) {
+            setIsEnrolled(true);
+            setEnrollmentStatus(enrollment.status);
+          }
+        } else if (isAuthenticated && role === "instructor" && courseData.data.course.instructor._id === user?._id) {
+          const { data: enrollmentData } = await axiosInstance.get(`/courses/${id}/enrollments`);
+          setInstructorEnrollments(enrollmentData.data.enrolledStudents);
         }
       } catch (error) {
         toast.error("Failed to load course details");
@@ -35,7 +45,7 @@ function CourseDetailPage() {
     };
 
     fetchCourseAndEnrollment();
-  }, [id, isAuthenticated, role]);
+  }, [id, isAuthenticated, role, user]);
 
   const handleEnroll = async () => {
     if (!isAuthenticated) {
@@ -47,10 +57,24 @@ function CourseDetailPage() {
       await axiosInstance.post(`/courses/${id}/enroll`);
       toast.success("Enrolled successfully!");
       setIsEnrolled(true);
+      setEnrollmentStatus("active");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to enroll");
     } finally {
       setEnrolling(false);
+    }
+  };
+
+  const handleComplete = async () => {
+    setCompleting(true);
+    try {
+      await axiosInstance.put(`/enrollments/${id}/complete`);
+      toast.success("Congratulations! You completed this course.");
+      setEnrollmentStatus("completed");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to mark as completed");
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -99,7 +123,13 @@ function CourseDetailPage() {
           <div className="course-detail-meta">
             <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
               By <strong style={{ color: "var(--color-text-primary)", marginLeft: "4px" }}>
-                {course.instructor?.name || "Unknown Instructor"}
+                {course.instructor?._id ? (
+                  <Link to={`/instructor-profile/${course.instructor._id}`} style={{ color: "inherit" }}>
+                    {course.instructor.name}
+                  </Link>
+                ) : (
+                  "Unknown Instructor"
+                )}
               </strong>
             </span>
             <span style={{ color: "var(--color-border-hover)" }}>|</span>
@@ -112,6 +142,22 @@ function CourseDetailPage() {
               <Calendar size={13} />
               Updated {new Date(course.updatedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
             </span>
+            {course.duration && (
+              <>
+                <span style={{ color: "var(--color-border-hover)" }}>|</span>
+                <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-text-secondary)" }}>
+                  {course.duration}
+                </span>
+              </>
+            )}
+            {course.level && (
+              <>
+                <span style={{ color: "var(--color-border-hover)" }}>|</span>
+                <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "var(--color-text-secondary)" }}>
+                  {course.level}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -124,10 +170,54 @@ function CourseDetailPage() {
             {course.content && (
               <>
                 <h2>Course content</h2>
-                <div style={{ whiteSpace: "pre-wrap", color: "var(--color-text-secondary)" }}>
-                  {course.content}
-                </div>
+                <div 
+                  className="markdown-content" 
+                  dangerouslySetInnerHTML={parseMarkdown(course.content)} 
+                />
               </>
+            )}
+
+            {/* Instructor View: Show Enrolled Students Table */}
+            {role === "instructor" && user?._id === course.instructor?._id && (
+              <div style={{ marginTop: "var(--space-8)" }}>
+                <h2 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Users size={20} /> Enrolled Students
+                </h2>
+                {instructorEnrollments.length === 0 ? (
+                  <div style={{ padding: "var(--space-4)", background: "var(--color-bg-elevated)", borderRadius: "var(--radius-md)", color: "var(--color-text-muted)" }}>
+                    No students have enrolled yet.
+                  </div>
+                ) : (
+                  <div className="table-container" style={{ marginTop: "var(--space-4)" }}>
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: "40px" }}>#</th>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Status</th>
+                          <th>Enrolled Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {instructorEnrollments.map((student, index) => (
+                          <tr key={student.email}>
+                            <td style={{ color: "var(--color-text-muted)" }}>{index + 1}</td>
+                            <td style={{ fontWeight: 500 }}>{student.name}</td>
+                            <td>{student.email}</td>
+                            <td>
+                              <span className={`badge ${student.status === "active" ? "badge-success" : "badge-info"}`}>
+                                {student.status}
+                              </span>
+                            </td>
+                            <td>{new Date(student.enrolledAt).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -142,17 +232,31 @@ function CourseDetailPage() {
                 </Link>
               ) : role === "student" ? (
                 isEnrolled ? (
-                  <button
-                    className="btn btn-block btn-lg"
-                    disabled
-                    style={{
-                      background: "var(--color-success-soft)",
-                      color: "var(--color-success)",
-                      border: "1.5px solid var(--color-success)",
-                    }}
-                  >
-                    Enrolled
-                  </button>
+                  enrollmentStatus === "completed" ? (
+                    <button
+                      className="btn btn-block btn-lg"
+                      disabled
+                      style={{
+                        background: "var(--color-success-soft)",
+                        color: "var(--color-success)",
+                        border: "1.5px solid var(--color-success)",
+                      }}
+                    >
+                      Course Completed
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary btn-block btn-lg"
+                      onClick={handleComplete}
+                      disabled={completing}
+                      style={{
+                        background: "var(--color-success)",
+                        borderColor: "var(--color-success)",
+                      }}
+                    >
+                      {completing ? "Updating…" : "Mark as Completed"}
+                    </button>
+                  )
                 ) : (
                   <button
                     className="btn btn-primary btn-block btn-lg"

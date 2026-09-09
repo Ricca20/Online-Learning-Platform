@@ -12,6 +12,8 @@ function ManageCoursePage() {
     title: "",
     description: "",
     category: "",
+    duration: "",
+    level: "All Levels",
     thumbnailUrl: "",
     content: "",
   });
@@ -29,6 +31,8 @@ function ManageCoursePage() {
             title: course.title || "",
             description: course.description || "",
             category: course.category || "",
+            duration: course.duration || "",
+            level: course.level || "All Levels",
             thumbnailUrl: course.thumbnailUrl || "",
             content: course.content || "",
           });
@@ -101,17 +105,46 @@ function ManageCoursePage() {
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="category">Category</label>
-            <input
-              type="text"
-              id="category"
-              name="category"
-              className="form-input"
-              placeholder="e.g. Web Development"
-              value={formData.category}
-              onChange={handleChange}
-            />
+          <div className="grid grid-cols-3" style={{ gap: "var(--space-4)" }}>
+            <div className="form-group" style={{ gridColumn: "span 1" }}>
+              <label className="form-label" htmlFor="category">Category</label>
+              <input
+                type="text"
+                id="category"
+                name="category"
+                className="form-input"
+                placeholder="e.g. Web Development"
+                value={formData.category}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group" style={{ gridColumn: "span 1" }}>
+              <label className="form-label" htmlFor="duration">Duration</label>
+              <input
+                type="text"
+                id="duration"
+                name="duration"
+                className="form-input"
+                placeholder="e.g. 4 Weeks, 10 Hours"
+                value={formData.duration}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group" style={{ gridColumn: "span 1" }}>
+              <label className="form-label" htmlFor="level">Level</label>
+              <select
+                id="level"
+                name="level"
+                className="form-select"
+                value={formData.level}
+                onChange={handleChange}
+              >
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="All Levels">All Levels</option>
+              </select>
+            </div>
           </div>
 
           <div className="form-group">
@@ -142,7 +175,12 @@ function ManageCoursePage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="content">Detailed Content</label>
+            <label className="form-label" htmlFor="content">
+              Detailed Content
+              <span style={{ fontWeight: "normal", color: "var(--color-text-muted)", marginLeft: "8px", fontSize: "0.8em" }}>
+                (Markdown supported)
+              </span>
+            </label>
             <textarea
               id="content"
               name="content"

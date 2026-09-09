@@ -9,6 +9,7 @@ const {
   deleteCourse,
   getInstructorCourses,
   getCourseEnrollments,
+  getCoursesByInstructorId,
 } = require("../controllers/courseController");
 const { enrollInCourse, getMyEnrollments } = require("../controllers/enrollmentController");
 const { verifyToken, authorise } = require("../middleware/authMiddleware");
@@ -21,6 +22,7 @@ const courseValidation = [
 
 // ──────── Public Routes ────────
 router.get("/", getAllCourses);
+router.get("/instructor/:instructorId", getCoursesByInstructorId);
 
 // ──────── Instructor Routes ────────
 // NOTE: /my MUST be defined BEFORE /:id to prevent "my" being treated as a mongo id param
