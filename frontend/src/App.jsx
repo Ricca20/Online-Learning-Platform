@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ChatBot from "./components/ChatBot";
 
 // Pages
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 
@@ -69,7 +70,7 @@ function App() {
           {/* All routes with navbar */}
           <Route element={<LayoutWithNavbar />}>
             {/* Public */}
-            <Route path="/" element={<Navigate to="/courses" replace />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/courses" element={<CoursesPage />} />
             <Route path="/courses/:id" element={<CourseDetailPage />} />
             <Route path="/instructor-profile/:id" element={<InstructorProfilePage />} />

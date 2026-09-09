@@ -58,10 +58,10 @@ function CoursesPage() {
 
   return (
     <div className="page container">
-      <div className="page-header" style={{ padding: "var(--space-8) var(--space-6)", border: "2px solid var(--color-border)", background: "var(--color-accent-soft)", marginBottom: "var(--space-8)", boxShadow: "var(--shadow-md)" }}>
-        <p className="section-label" style={{ color: "var(--color-border)" }}>Catalog</p>
-        <h1 style={{ fontWeight: 800, fontSize: "var(--font-size-4xl)", letterSpacing: "-0.03em" }}>Acquire production-ready skills.</h1>
-        <p style={{ color: "var(--color-text-primary)", fontWeight: 500 }}>Master React, Node.js, and System Design through comprehensive, instructor-led courses.</p>
+      <div className="page-header">
+        <p className="section-label">All Courses</p>
+        <h1>Browse the catalog</h1>
+        <p>Expert-led courses in programming, design, business, and more.</p>
       </div>
 
       {/* Search / filter bar */}

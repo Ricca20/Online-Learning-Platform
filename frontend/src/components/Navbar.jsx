@@ -50,12 +50,6 @@ function Navbar() {
               >
                 Dashboard
               </Link>
-              <Link
-                to="/instructor/courses/new"
-                className={isActive("/instructor/courses/new") ? "active" : ""}
-              >
-                New Course
-              </Link>
             </>
           )}
         </div>

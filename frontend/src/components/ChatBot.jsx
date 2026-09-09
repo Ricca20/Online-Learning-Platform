@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import axiosInstance from "../api/axiosInstance";
-import { Cpu, X, Send, ChevronDown } from "lucide-react";
+import { Bot, X, Send, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const WELCOME = {
@@ -41,16 +41,66 @@ function ChatBot() {
     setLoading(true);
 
     try {
-      const { data } = await axiosInstance.post("/ai/recommend", { prompt: text });
+      const token = localStorage.getItem("token");
+      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:5001/api/v1";
+      
+      const response = await fetch(`${baseURL}/ai/recommend`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ prompt: text })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || "Failed to fetch response");
+      }
+
+      // Add empty AI message that we will append to
+      setMessages((prev) => [...prev, { role: "ai", text: "" }]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let done = false;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value, { stream: true });
+        
+        const lines = chunkValue.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const dataStr = line.slice(6).trim();
+            if (dataStr === "[DONE]") {
+              done = true;
+              break;
+            }
+            if (dataStr) {
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.error) throw new Error("Stream error");
+                if (parsed.text) {
+                  setMessages((prev) => {
+                    const newMsgs = [...prev];
+                    newMsgs[newMsgs.length - 1].text += parsed.text;
+                    return newMsgs;
+                  });
+                }
+              } catch (e) {
+                // Ignore partial JSON chunks parsing errors
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
       setMessages((prev) => [
         ...prev,
-        { role: "ai", text: data.data.recommendation },
+        { role: "ai", text: error.message || "Something went wrong. Please try again.", error: true },
       ]);
-    } catch (error) {
-      const errText =
-        error.response?.data?.message ||
-        "Something went wrong. Please try again.";
-      setMessages((prev) => [...prev, { role: "ai", text: errText, error: true }]);
     } finally {
       setLoading(false);
     }
@@ -63,8 +113,8 @@ function ChatBot() {
     }
   };
 
-  // Only show for students (or unauthenticated users browsing)
-  if (role === "instructor") return null;
+  // Only show for authenticated students
+  if (role !== "student") return null;
 
   return (
     <>
@@ -102,7 +152,7 @@ function ChatBot() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Cpu size={18} />
+            <Bot size={20} />
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.95rem", lineHeight: 1.2 }}>
                 AI Course Advisor
@@ -239,7 +289,11 @@ function ChatBot() {
             rows={1}
             placeholder="Ask about courses…"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = Math.min(e.target.scrollHeight, 100) + "px";
+            }}
             onKeyDown={handleKey}
             style={{
               flex: 1,
@@ -254,6 +308,7 @@ function ChatBot() {
               outline: "none",
               lineHeight: "1.5",
               maxHeight: "100px",
+              minHeight: "42px",
               overflowY: "auto",
             }}
             onFocus={(e) =>
@@ -324,7 +379,7 @@ function ChatBot() {
           e.currentTarget.style.transform = "scale(1)";
         }}
       >
-        {open ? <X size={20} /> : <Cpu size={20} />}
+        {open ? <X size={20} /> : <Bot size={24} />}
       </button>
 
       {/* Typing dot animation */}

@@ -1,40 +1,30 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
-// Solid bold colors for Neo-Brutalist design
+// Deterministic teal shade based on course title — no AI images
 const THUMB_COLORS = [
-  "#f97316", // Orange
-  "#2563eb", // Blue
-  "#16a34a", // Green
-  "#dc2626", // Red
-  "#8b5cf6", // Violet (wait, user said no purple, I will use yellow)
-];
-
-// Re-defining THUMB_COLORS without purple
-const BOLD_COLORS = [
-  "#f97316", // Orange
-  "#2563eb", // Blue
-  "#16a34a", // Green
-  "#dc2626", // Red
-  "#eab308", // Yellow
+  ["#0d9488","#0891b2"],
+  ["#0f766e","#0369a1"],
+  ["#115e59","#075985"],
+  ["#134e4a","#0c4a6e"],
+  ["#0e7490","#0f766e"],
 ];
 
 function getThumbColors(title = "") {
-  const idx = title.charCodeAt(0) % BOLD_COLORS.length;
-  return BOLD_COLORS[idx];
+  const idx = title.charCodeAt(0) % THUMB_COLORS.length;
+  return THUMB_COLORS[idx];
 }
 
 function CourseCard({ course }) {
-  const bgColor = getThumbColors(course.title);
+  const [c1, c2] = getThumbColors(course.title);
 
   return (
-    <div className="course-card" id={`course-card-${course._id}`} style={{ border: "2px solid var(--color-border)", boxShadow: "var(--shadow-sm)" }}>
+    <div className="course-card" id={`course-card-${course._id}`}>
       {course.thumbnailUrl ? (
         <img
           className="course-card-thumbnail"
           src={course.thumbnailUrl}
           alt={course.title}
-          style={{ borderBottom: "2px solid var(--color-border)" }}
           onError={(e) => {
             e.target.style.display = "none";
             e.target.nextSibling.style.display = "flex";
@@ -44,13 +34,8 @@ function CourseCard({ course }) {
       <div
         className="course-card-thumb-placeholder"
         style={{
-          background: bgColor,
-          borderBottom: "2px solid var(--color-border)",
-          color: "#fff",
+          background: `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`,
           display: course.thumbnailUrl ? "none" : "flex",
-          fontWeight: 800,
-          fontSize: "1.2rem",
-          letterSpacing: "-0.02em"
         }}
       >
         {course.title?.substring(0, 32)}
