@@ -50,7 +50,11 @@ function ChatBot() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ prompt: text })
+        body: JSON.stringify({
+          prompt: text,
+          // Send full conversation history so the AI can handle follow-up questions
+          history: messages.filter((m) => m.text), // exclude any empty messages
+        })
       });
 
       if (!response.ok) {
@@ -64,13 +68,19 @@ function ChatBot() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
       let done = false;
+      let buffer = "";
 
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
-        const chunkValue = decoder.decode(value, { stream: true });
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+        }
         
-        const lines = chunkValue.split("\n");
+        const lines = buffer.split("\n");
+        // Keep the last (potentially incomplete) line in the buffer
+        buffer = lines.pop() || "";
+        
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             const dataStr = line.slice(6).trim();
@@ -79,18 +89,26 @@ function ChatBot() {
               break;
             }
             if (dataStr) {
+              let parsed;
               try {
-                const parsed = JSON.parse(dataStr);
-                if (parsed.error) throw new Error("Stream error");
-                if (parsed.text) {
-                  setMessages((prev) => {
-                    const newMsgs = [...prev];
-                    newMsgs[newMsgs.length - 1].text += parsed.text;
-                    return newMsgs;
-                  });
-                }
+                parsed = JSON.parse(dataStr);
               } catch (e) {
-                // Ignore partial JSON chunks parsing errors
+                continue; // Skip invalid JSON
+              }
+              
+              if (parsed.error) {
+                // If backend sent an error event, throw to outer catch
+                throw new Error(parsed.text || "Stream error");
+              }
+              
+              if (parsed.text) {
+                setMessages((prev) => {
+                  const newMsgs = [...prev];
+                  const lastMsg = { ...newMsgs[newMsgs.length - 1] };
+                  lastMsg.text += parsed.text;
+                  newMsgs[newMsgs.length - 1] = lastMsg;
+                  return newMsgs;
+                });
               }
             }
           }
