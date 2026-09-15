@@ -97,8 +97,15 @@ function ChatBot() {
               }
               
               if (parsed.error) {
-                // If backend sent an error event, throw to outer catch
-                throw new Error(parsed.text || "Stream error");
+                setMessages((prev) => {
+                  const newMsgs = [...prev];
+                  const lastMsg = { ...newMsgs[newMsgs.length - 1], error: true };
+                  lastMsg.text = parsed.text || "Stream error";
+                  newMsgs[newMsgs.length - 1] = lastMsg;
+                  return newMsgs;
+                });
+                done = true;
+                break;
               }
               
               if (parsed.text) {
@@ -115,10 +122,16 @@ function ChatBot() {
         }
       }
     } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", text: error.message || "Something went wrong. Please try again.", error: true },
-      ]);
+      setMessages((prev) => {
+        const newMsgs = [...prev];
+        if (newMsgs.length > 0 && newMsgs[newMsgs.length - 1].role === "ai" && newMsgs[newMsgs.length - 1].text === "") {
+          newMsgs.pop();
+        }
+        return [
+          ...newMsgs,
+          { role: "ai", text: error.message || "Something went wrong. Please try again.", error: true },
+        ];
+      });
     } finally {
       setLoading(false);
     }

@@ -49,13 +49,25 @@ INSTRUCTIONS:
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no"); // disable nginx proxy buffering for real-time SSE
   res.flushHeaders();
 
-  // Guard against unconfigured API key by providing a realistic dynamic fallback
+  // Setup abort controller for client disconnect cleanup
+  const abortController = new AbortController();
+  req.on("close", () => {
+    abortController.abort();
+  });
+
+  // Guard against unconfigured API key or invalid format by providing a realistic dynamic fallback
   const apiKey = process.env.OPENAI_API_KEY;
 
-  // Fallback if no real API key is configured
-  if (!apiKey || apiKey === "your_openai_api_key_here") {
+  // Fallback if no real API key is configured or format is invalid
+  if (
+    !apiKey ||
+    apiKey === "your_openai_api_key_here" ||
+    !apiKey.startsWith("sk-") ||
+    apiKey.length < 20
+  ) {
     const p = prompt.toLowerCase();
 
     const intents = [
@@ -107,9 +119,11 @@ INSTRUCTIONS:
         "I couldn't find a specific match for that topic in our current catalog. Could you tell me more about your goal? For example, are you interested in Web Development, Backend, Design, Data Science, or Business?";
     }
 
-    res.write(`data: ${JSON.stringify({ text: recommendation })}\n\n`);
-    res.write("data: [DONE]\n\n");
-    res.end();
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ text: recommendation })}\n\n`);
+      res.write("data: [DONE]\n\n");
+      res.end();
+    }
     return;
   }
 
@@ -127,32 +141,58 @@ INSTRUCTIONS:
   try {
     const openai = new OpenAI({ apiKey });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages,
-      max_tokens: 800,
-      temperature: 0.7,
-      stream: true,
-    });
+    let completion;
+    try {
+      completion = await openai.chat.completions.create(
+        {
+          model: "gpt-4o-mini",
+          messages,
+          max_tokens: 800,
+          temperature: 0.7,
+          stream: true,
+        },
+        { signal: abortController.signal }
+      );
+    } catch (modelErr) {
+      console.warn("gpt-4o-mini failed, falling back to gpt-3.5-turbo:", modelErr.message);
+      completion = await openai.chat.completions.create(
+        {
+          model: "gpt-3.5-turbo",
+          messages,
+          max_tokens: 800,
+          temperature: 0.7,
+          stream: true,
+        },
+        { signal: abortController.signal }
+      );
+    }
 
     for await (const chunk of completion) {
+      if (res.writableEnded) break;
       const content = chunk.choices[0]?.delta?.content || "";
       if (content) {
         res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
       }
     }
 
-    res.write("data: [DONE]\n\n");
-    res.end();
+    if (!res.writableEnded) {
+      res.write("data: [DONE]\n\n");
+      res.end();
+    }
   } catch (error) {
+    if (error.name === "AbortError" || res.writableEnded) {
+      return;
+    }
     console.error("OpenAI Stream Error:", error);
     let errorMsg = "An error occurred while generating the response.";
     if (error.status === 429) errorMsg = "The AI service is currently busy. Please try again in a moment.";
-    else if (error.status === 401) errorMsg = "AI service authentication failed. Please check your API key.";
+    else if (error.status === 401) errorMsg = "Authentication failed. Please check that your OpenAI API key is valid and properly configured.";
     else if (error.message) errorMsg = error.message;
 
-    res.write(`data: ${JSON.stringify({ error: true, text: "\n\n⚠️ " + errorMsg })}\n\n`);
-    res.end();
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ error: true, text: "\n\n⚠️ " + errorMsg })}\n\n`);
+      res.end();
+    }
   }
 });
 
