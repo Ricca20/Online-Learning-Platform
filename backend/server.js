@@ -28,15 +28,23 @@ const authLimiter = rateLimit({
 });
 
 // --------------- CORS ---------------
+const allowedOrigins = [
+  "https://online-learning-platform-ebon-nu.vercel.app",
+  // Add any additional Vercel preview/branch URLs below:
+  // "https://your-preview-url.vercel.app",
+];
+
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Allow requests with no origin (e.g. server-to-server, Postman)
+      if (!origin) return callback(null, true);
       // Allow any localhost origin for development
-      if (!origin || origin.startsWith("http://localhost:")) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+      if (origin.startsWith("http://localhost:")) return callback(null, true);
+      // Allow listed production origins
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
